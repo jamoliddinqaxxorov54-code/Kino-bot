@@ -61,4 +61,24 @@ def handle_text(message):
         bot.send_message(chat_id, "😔 Afsuski, bunday kod bilan kino topilmadi. Kodni to'g'ri yozganingizni tekshiring.")
 
 # Botni uzluksiz ishlatish
-bot.polling(none_stop=True)
+import os
+from flask import Flask
+
+# Flask serveri botni "o'lik" deb o'ylamasligi uchun
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot ishlayapti!"
+
+if __name__ == "__main__":
+    # Botni alohida jarayonda (thread) ishga tushirish
+    import threading
+    def run_bot():
+        bot.infinity_polling()
+    
+    threading.Thread(target=run_bot).start()
+    
+    # Flask serverini ishga tushirish (Render buni kutadi)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
