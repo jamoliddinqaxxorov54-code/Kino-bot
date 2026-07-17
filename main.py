@@ -3,7 +3,7 @@ import json
 import os
 
 # 1. BOT TOKENINGIZNI SHU YERGA YOZING
-TOKEN = "Sizning_Bot_Tokeningiz_Shu_Yurga_Yoziladi" 
+TOKEN = "8754918257:AAEl0-UT2iMtEWCAkvYX4f7UlQre9VE1b8o" 
 
 bot = telebot.TeleBot(TOKEN)
 DB_FILE = "kinolar.json"
