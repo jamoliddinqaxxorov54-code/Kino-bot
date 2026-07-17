@@ -1,9 +1,11 @@
 import telebot
 import json
 import os
+import threading
+from flask import Flask
 
 # 1. BOT TOKENINGIZNI SHU YERGA YOZING
-TOKEN = "8754918257:AAEl0-UT2iMtEWCAkvYX4f7UlQre9VE1b8o" 
+TOKEN = "8754918257:AAEl0-UT2iMtEWCAkvYX4f7UlQre9VE1b8o"
 
 bot = telebot.TeleBot(TOKEN)
 DB_FILE = "kinolar.json"
@@ -17,6 +19,13 @@ else:
 
 # Vaqtinchalik yuklangan kinoni saqlab turish uchun
 kutayotgan_kino = {}
+
+# Flask serverini yaratish
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot ishlayapti!"
 
 # Botga /start bosilganda
 @bot.message_handler(commands=['start'])
@@ -36,49 +45,31 @@ def handle_video(message):
     kutayotgan_kino[chat_id] = video_id
     bot.send_message(chat_id, "Kino qabul qilindi! Endi ushbu kino uchun kod (son) yuboring:")
 
-# Matnli xabarlar kelganda (Kod kiritilganda yoki izlanganda)
+# Matnli xabarlar kelganda
 @bot.message_handler(func=lambda message: True)
 def handle_text(message):
     chat_id = message.chat.id
     text = message.text.strip()
 
-    # Agar admin kino yuklagan bo'lsa va kodini yozgan bo'lsa
     if chat_id in kutayotgan_kino:
         video_id = kutayotgan_kino[chat_id]
         kinolar[text] = video_id
-        
         with open(DB_FILE, "w") as f:
             json.dump(kinolar, f)
-            
         del kutayotgan_kino[chat_id]
         bot.send_message(chat_id, f"✅ Muvaffaqiyatli saqlandi! Kino kodi: {text}")
         return
 
-    # Agar foydalanuvchi kino qidirayotgan bo'lsa
     if text in kinolar:
         bot.send_video(chat_id, kinolar[text], caption=f"🎬 Kino kodi: {text}\nYoqimli tomosha!")
     else:
-        bot.send_message(chat_id, "😔 Afsuski, bunday kod bilan kino topilmadi. Kodni to'g'ri yozganingizni tekshiring.")
+        bot.send_message(chat_id, "😔 Afsuski, bunday kod bilan kino topilmadi.")
 
-# Botni uzluksiz ishlatish
-import os
-from flask import Flask
-
-# Flask serveri botni "o'lik" deb o'ylamasligi uchun
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Bot ishlayapti!"
+# Botni va Flaskni ishga tushirish
+def run_bot():
+    bot.infinity_polling()
 
 if __name__ == "__main__":
-    # Botni alohida jarayonda (thread) ishga tushirish
-    import threading
-    def run_bot():
-        bot.infinity_polling()
-    
     threading.Thread(target=run_bot).start()
-    
-    # Flask serverini ishga tushirish (Render buni kutadi)
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
