@@ -5,7 +5,8 @@ import threading
 from flask import Flask
 
 # 1. BOT TOKENINGIZNI SHU YERGA YOZING
-TOKEN = "8754918257:AAEl0-UT2iMtEWCAkvYX4f7UlQre9VE1b8o"
+TOKEN = "8209686139:AAGTrB0BJAcLDdoslXghDY7hMfEUNiCNkig"
+
 
 bot = telebot.TeleBot(TOKEN)
 DB_FILE = "kinolar.json"
